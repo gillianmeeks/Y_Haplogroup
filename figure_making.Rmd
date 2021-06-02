@@ -30,31 +30,26 @@ library(rcartocolor)
 library(spData)
 library(tidyverse)
 library(maptools)
-setwd('/Users/gillianmeeks/Desktop/R_projects/Y_haplogroup')
+setwd('/Users/gillianmeeks/Desktop/R_projects/Y_haplogroup/')
 cederberg <- read.delim(file='sa3')
 sac <- read.csv(file='Table4_SAC.csv')
 NGS <- read.delim(file='NGS_yHaplo_freq.txt')
-NCTB <- read.delim(file='NCTB')
 table_3 <- read.csv(file='Table3.csv')
-haplo_super <- read.csv(file='Super_Haplogroup_conversions_othersfor1instance.csv')
+haplo_super <- read.csv(file='Super_Haplogroup_conversions.csv')
 
 ```
 ```{r}
 cederberg_counts <- as.data.frame(table(cederberg$Haplo))
-NCTB_counts <- as.data.frame(table(NCTB$Haplo))
 
 NGS_counts <- NGS[,-4]
 NGS_counts <- NGS_counts[,-2]
 sac <- sac[,-3]
 cederberg_counts <- cederberg_counts[,-3]
 cederberg_counts <- cederberg_counts[,-3]
-NCTB_counts <- NCTB_counts[,-3]
-NCTB_counts <- NCTB_counts[,-3]
 names(NGS_counts)[names(NGS_counts)=='H3'] <- 'Haplogroup'
 names(NGS_counts)[names(NGS_counts)=='n'] <- 'Count'
 
 cederberg_counts$Var1 <- as.character(cederberg_counts$Var1)
-NCTB_counts$Var1 <- as.character(NCTB_counts$Var1)
 
 #counts <- c(unique(cederberg_counts$Var1), unique(NGS_counts$Var1), unique(sac$Var1))
 for (row in 1:nrow(cederberg_counts)){
@@ -62,13 +57,6 @@ for (row in 1:nrow(cederberg_counts)){
     if (cederberg_counts[row, ]$Var1 == haplo_super[name, ]$Haplogroup)
     {cederberg_counts[row, ]$Var1 <- haplo_super[name, ]$Supergroup}
 }
-
-for (row in 1:nrow(NCTB_counts)){
-    for(name in 1:nrow(haplo_super))
-    if (NCTB_counts[row, ]$Var1 == haplo_super[name, ]$Haplogroup)
-    {NCTB_counts[row, ]$Var1 <- haplo_super[name, ]$Supergroup}
-}
-
 
 for (row in 1:nrow(sac)){
     for(name in 1:nrow(haplo_super))
@@ -87,7 +75,6 @@ for (row in 1:nrow(NGS_counts)){
 ```{r}
 
 sac_counts <- aggregate(sac$Count, by=list(sac$Haplogroup), "sum")
-NCTB_counts <- aggregate(NCTB_counts$Freq, by=list(NCTB_counts$Var1), "sum")
 cederberg_counts <- aggregate(cederberg_counts$Freq, by=list(cederberg_counts$Var1), "sum")
 NGS_counts$Var1 <- NGS_counts$Haplogroup
 NGS_counts$Freq <- NGS_counts$Count
@@ -161,9 +148,6 @@ cederberg <- cederberg  %>%
 sac <- as.data.frame(t(tally_super_groups(sac_counts)))
 sac <- sac  %>%
   row_to_names(row_number=1)
-NCTB <- as.data.frame(t(tally_super_groups(NCTB_counts)))
-NCTB <- NCTB %>%
-  row_to_names(row_number = 1)
 
 
 ```
@@ -174,10 +158,6 @@ NCTB <- NCTB %>%
 
 
 ```{r}
-NCTB$lon <- -11
-NCTB$lat <- -27
-NCTB$id <- 'N. Cape'
-NCTB$n <- 'n=69'
 cederberg$lon <- 28
 cederberg$lat <- -42
 cederberg$id <- 'Cederberg'
@@ -186,37 +166,37 @@ sac$lon <- 6
 sac$lat <- -42
 sac$id <- 'SAC'
 sac$n <- "n=351"
-Maasai$lon <- 40
-Maasai$lat <- 4
+Maasai$lon <- 38
+Maasai$lat <- 2
 Maasai$id <- 'Maasai'
 Maasai$n <- "n=66"
-Biaka$lat <- 15
-Biaka$lon <- 25
+Biaka$lat <- 8
+Biaka$lon <- 17.8
 Biaka$id <- 'Biaka'
 Biaka$n <- "n=31"
-Baka$lat <- 14
-Baka$lon <- -3
+Baka$lat <- -3
+Baka$lon <- 1
 Baka$id <- 'Baka'
 Baka$n <- "n=18"
 San$lat <- -12.5
 San$lon <- 24.5
 San$id <- 'San'
 San$n <- "n=7"
-Khomani$lat <- -44
-Khomani$lon <- 52
+Khomani$lat <- -41
+Khomani$lon <- 47
 Khomani$id <- 'Khomani'
 Khomani$n <- "n=47"
-Nama$lat <- -12
-Nama$lon <- 3
+Nama$lat <- -20
+Nama$lon <- 10
 Nama$id <- 'Nama'
 Nama$n <-"n=55"
 Zimbabweans$lat <- -20
-Zimbabweans$lon <- 47
+Zimbabweans$lon <- 44
 Zimbabweans$id <- 'Zimbabweans'
 Zimbabweans$n <- "n=48"
 
 
-piechart_counts <- rbind(Khomani, Nama, Zimbabweans, San, Baka, Biaka, Maasai, cederberg, sac, NCTB)
+piechart_counts <- rbind(Khomani, Nama, Zimbabweans, San, Baka, Biaka, Maasai, cederberg, sac)
 piechart_counts$lat <- as.numeric(piechart_counts$lat)
 piechart_counts$lon <- as.numeric(piechart_counts$lon)
 ```
@@ -226,34 +206,32 @@ piechart_counts$lon <- as.numeric(piechart_counts$lon)
 cols=colnames(piechart_counts[,c(1:length(all_super_groups))]) 
 piechart_counts[,c(1:length(all))] <- sapply(piechart_counts[,c(1:length(all))],as.numeric)
 
-#all <- all[,c(7,2,4,6,3,5,17,14,9,13,15,8,10, 11,12,16,18,1)]
+all <- all[,c(1,8, 2,4,9,3,7,5,17,22,19,16,11,15,20,10,12,13,14,18,21,6)]
 data(wrld_simpl)
 afr=wrld_simpl[wrld_simpl$REGION==2,]
 library(tidyverse)
 
-df <- data.frame(Sanx = 19.458512, Sany = -22.070104, Namax=17.004616, Namay=-28.411234, Khomanix=20.089492, Khomaniy=-26.721863, Cederbergx=19.1255, Cederbergy=-32.338056, SACx=18.4232, SACy=-33.9188, Bakax=12.639878, Bakay=4.612571, Zimby=-20.151192, Zimbx=28.649864, Maasaix=37.574437, Maasaiy=-2.222969, Biakax=17.87472, Biakay=3.866779, NCTBx=22, NCTBy=-30)
+df <- data.frame(Sanx = 19.458512, Sany = -22.070104, Namax=17.004616, Namay=-28.411234, Khomanix=20.089492, Khomaniy=-26.721863, Cederbergx=19.1255, Cederbergy=-32.338056, SACx=18.4232, SACy=-33.9188, Bakax=12.639878, Bakay=4.612571, Zimby=-20.151192, Zimbx=28.649864, Maasaix=37.574437, Maasaiy=-2.222969, Biakax=17.87472, Biakay=3.866779)
 
 aspect_ratio <- 2.5
 height <- 7
-All <- colnames(all)
-ggplot() +
-  geom_polygon(data=afr, aes(x=long, y=lat, group=group), size=10, alpha=0.9, fill="darkgrey")+
+haplogroups <- ggplot() +
+  geom_polygon(data=afr, aes(x=long, y=lat, group=group), size=5, alpha=0.9, fill="darkgrey")+
   geom_segment(aes(x = Sanx, y = Sany, xend = 24.5 , yend = -12.5), data = df)+
-geom_segment(aes(x = Namax, y = Namay, xend = 3 , yend = -12), data = df)+
-geom_segment(aes(x = Khomanix, y = Khomaniy, xend = 52 , yend = -44), data = df)+
+geom_segment(aes(x = Namax, y = Namay, xend = 10 , yend = -20), data = df)+
+geom_segment(aes(x = Khomanix, y = Khomaniy, xend = 47 , yend = -41), data = df)+
 geom_segment(aes(x = Cederbergx, y = Cederbergy, xend = 28 , yend = -42), data = df)+
 geom_segment(aes(x=SACx, y=SACy, xend= 6, yend= -42), data=df)+
-geom_segment(aes(x=Bakax, y=Bakay, xend= -3, yend= 14), data=df)+
-geom_segment(aes(x=Zimbx, y=Zimby, xend= 47, yend= -20), data=df)+
-geom_segment(aes(x=Maasaix, y=Maasaiy, xend= 40, yend= 2), data=df)+
-geom_segment(aes(x=Biakax, y=Biakay, xend= 20 , yend= 15 ), data=df)+
-geom_segment(aes(x=NCTBx, y=NCTBy, xend=-11, yend=-27), data=df)+
-geom_scatterpie(data=piechart_counts, aes(x=lon, y=lat, r = 7.6), cols=colnames(all), pie_scale = 1, legend_name = "Haplogroups") + coord_sf(xlim = c(-22, 63), ylim = c(-60, 26), expand = FALSE)+
-  scale_fill_manual(labels = colnames(all), values = c('A1b (KHS)' = 'firebrick4', 'E1b1b1b2b (E. AFR)'= 'saddlebrown', 'B2b (KHS)'='red3', 'E1b1b1b2a1 (KHS)'= 'orangered1', 'B2a (BAN)' = 'darkolivegreen4',  'E (BAN)' = 'darkgreen', 'O (E. ASN)'='lightpink', 'K (S.E. ASN)'='deeppink', 'R2a (S. ASN)' = 'darkorchid4', 'L1a (S. ASN)'='darkmagenta', 'H1 (S. ASN)'= 'darkorchid1', 'H1a1d2c1b1a (EUR)'='blue1', 'I (EUR)'='cornflowerblue','J (EUR)'= 'cyan','G2a (EUR)' = 'navyblue','R1 (EUR)'='#59C7EB', 'T (EUR)'='#CCEEF9', 'Other'= 'black' )) + theme(legend.position = "bottom")+
-  geom_text(aes(x=lon, y=lat-9.6, label=id), data=piechart_counts, fontface="bold")+
-  geom_text(aes(x=lon, y=lat-13.2, label=n), data=piechart_counts, size=3)
+geom_segment(aes(x=Bakax, y=Bakay, xend= 1, yend= -3), data=df)+
+  geom_segment(aes(x=Zimbx, y=Zimby, xend= 44, yend= -20), data=df)+
+  geom_segment(aes(x=Maasaix, y=Maasaiy, xend= 38, yend= 2), data=df)+
+  geom_segment(aes(x=Biakax, y=Biakay, xend= 17.8 , yend= 8 ), data=df)+
+  geom_scatterpie(data=piechart_counts, aes(x=lon, y=lat, r = 7.8), cols= colnames(all), pie_scale = 1, legend_name = "Haplogroups") + coord_sf(xlim = c(-9, 56), ylim = c(-56, 18), expand = FALSE)+
+  scale_fill_manual(labels = colnames(all), values = c('A1b (KHS)' = 'firebrick4', 'E1b1b1b2b (E. AFR)'= 'saddlebrown', 'A0a1a (Basal)'= 'grey', 'B2b (KHS)'='red3', 'E1b1b1b2a1 (KHS)'= 'orangered1', 'B2a (BAN)' = 'darkolivegreen4',  'E (BAN)' = 'darkgreen','C2e1b1 (E.ASN)' = 'lightgoldenrod', 'O (E. ASN)'='gold1','Q1a2 (E. ASN)'='yellow', 'K (S.E. ASN)'='hotpink', 'S (S.E. ASN)'='deeppink3', 'R2a (S. ASN)' = 'darkorchid4', 'L1a (S. ASN)'='darkmagenta', 'H1 (S. ASN)'= 'darkorchid1', 'H1a1d2c1b1a (EUR)'='blue3', 'I (EUR)'='blue1','J (EUR)'= 'cornflowerblue','G2a (EUR)' = 'navyblue','R1 (EUR)'='#59C7EB',  'T (EUR)'='#CCEEF9', 'CF'= 'black' )) + theme(legend.position = "bottom")+
+  geom_text(aes(x=lon, y=lat-9.0, label=id), data=piechart_counts, fontface="bold")+
+  geom_text(aes(x=lon, y=lat-11.1, label=n), data=piechart_counts, size=3)
 
-ggsave("haplogroups.png", plot=last_plot(), height = 7 , width = 7 * aspect_ratio)
+#ggsave("haplogroups.png", plot=last_plot(), height = 7 , width = 7 * aspect_ratio)
 
 
 
@@ -266,32 +244,22 @@ sac <- read.csv(file='Table4_SAC.csv')
 NGS <- read.delim(file='NGS_yHaplo_freq.txt')
 table_3 <- read.csv(file='Table3.csv')
 haplo_super <- read.csv(file='Super_Haplogroup_conversions.csv')
-NCTB <- read.delim(file='NCTB')
 ```
 
 
 
 ```{r}
 cederberg_counts <- as.data.frame(table(cederberg$Haplo))
-NCTB_counts <- as.data.frame(table(NCTB$Haplo))
+
 NGS_counts <- NGS[,-4]
 NGS_counts <- NGS_counts[,-2]
 sac <- sac[,-3]
 cederberg_counts <- cederberg_counts[,-3]
 cederberg_counts <- cederberg_counts[,-3]
-NCTB_counts <- NCTB_counts[,-3]
-NCTB_counts <- NCTB_counts[,-3]
 names(NGS_counts)[names(NGS_counts)=='H3'] <- 'Haplogroup'
 names(NGS_counts)[names(NGS_counts)=='n'] <- 'Count'
 
 cederberg_counts$Var1 <- as.character(cederberg_counts$Var1)
-NCTB_counts$Var1 <- as.character(NCTB_counts$Var1)
-
-for (row in 1:nrow(NCTB_counts)){
-    for(name in 1:nrow(haplo_super))
-    if (NCTB_counts[row, ]$Var1 == haplo_super[name, ]$Haplogroup)
-    {NCTB_counts[row, ]$Var1 <- haplo_super[name, ]$Geographic_level}
-}
 
 #counts <- c(unique(cederberg_counts$Var1), unique(NGS_counts$Var1), unique(sac$Var1))
 for (row in 1:nrow(cederberg_counts)){
@@ -315,7 +283,7 @@ for (row in 1:nrow(NGS_counts)){
 
 ```
 ```{r}
-NCTB_counts <- aggregate(NCTB_counts$Freq, by=list(NCTB_counts$Var1), "sum")
+
 sac_counts <- aggregate(sac$Count, by=list(sac$Haplogroup), "sum")
 cederberg_counts <- aggregate(cederberg_counts$Freq, by=list(cederberg_counts$Var1), "sum")
 NGS_counts$Var1 <- NGS_counts$Haplogroup
@@ -390,9 +358,7 @@ cederberg <- cederberg  %>%
 sac <- as.data.frame(t(tally_super_groups(sac_counts)))
 sac <- sac  %>%
   row_to_names(row_number=1)
-NCTB <- as.data.frame(t(tally_super_groups(NCTB_counts)))
-NCTB <- NCTB %>%
-  row_to_names(row_number = 1)
+
 
 ```
 
@@ -402,10 +368,6 @@ NCTB <- NCTB %>%
 
 
 ```{r}
-NCTB$lon <- -11
-NCTB$lat <- -27
-NCTB$id <- 'N. Cape'
-NCTB$n <- 'n=69'
 cederberg$lon <- 28
 cederberg$lat <- -42
 cederberg$id <- 'Cederberg'
@@ -414,37 +376,37 @@ sac$lon <- 6
 sac$lat <- -42
 sac$id <- 'SAC'
 sac$n <- "n=351"
-Maasai$lon <- 40
-Maasai$lat <- 4
+Maasai$lon <- 38
+Maasai$lat <- 2
 Maasai$id <- 'Maasai'
 Maasai$n <- "n=66"
-Biaka$lat <- 15
-Biaka$lon <- 25
+Biaka$lat <- 8
+Biaka$lon <- 17.8
 Biaka$id <- 'Biaka'
 Biaka$n <- "n=31"
-Baka$lat <- 14
-Baka$lon <- -3
+Baka$lat <- -3
+Baka$lon <- 1
 Baka$id <- 'Baka'
 Baka$n <- "n=18"
-San$lat <- -12.5
-San$lon <- 24.5
+San$lat <- -10
+San$lon <- 25.5
 San$id <- 'San'
 San$n <- "n=7"
-Khomani$lat <- -44
-Khomani$lon <- 52
+Khomani$lat <- -41
+Khomani$lon <- 47
 Khomani$id <- 'Khomani'
 Khomani$n <- "n=47"
-Nama$lat <- -12
-Nama$lon <- 3
+Nama$lat <- -20
+Nama$lon <- 10
 Nama$id <- 'Nama'
 Nama$n <-"n=55"
 Zimbabweans$lat <- -20
-Zimbabweans$lon <- 47
+Zimbabweans$lon <- 44
 Zimbabweans$id <- 'Zimbabweans'
 Zimbabweans$n <- "n=48"
 
 
-piechart_counts <- rbind(Khomani, Nama, Zimbabweans, San, Baka, Biaka, Maasai, cederberg, sac, NCTB)
+piechart_counts <- rbind(Khomani, Nama, Zimbabweans, San, Baka, Biaka, Maasai, cederberg, sac)
 piechart_counts$lat <- as.numeric(piechart_counts$lat)
 piechart_counts$lon <- as.numeric(piechart_counts$lon)
 
@@ -459,30 +421,27 @@ all <- all[,c(5,2,3,4,6,1)]
 data(wrld_simpl)
 afr=wrld_simpl[wrld_simpl$REGION==2,]
 library(tidyverse)
-
-df <- data.frame(Sanx = 19.458512, Sany = -22.070104, Namax=17.004616, Namay=-28.411234, Khomanix=20.089492, Khomaniy=-26.721863, Cederbergx=19.1255, Cederbergy=-32.338056, SACx=18.4232, SACy=-33.9188, Bakax=12.639878, Bakay=4.612571, Zimby=-20.151192, Zimbx=28.649864, Maasaix=37.574437, Maasaiy=-2.222969, Biakax=17.87472, Biakay=3.866779, NCTBx=22, NCTBy=-30)
+df <- data.frame(Sanx = 19.458512, Sany = -22.070104, Namax=17.004616, Namay=-28.411234, Khomanix=20.089492, Khomaniy=-26.721863, Cederbergx=19.1255, Cederbergy=-32.338056, SACx=18.4232, SACy=-33.9188, Bakax=12.639878, Bakay=4.612571, Zimby=-20.151192, Zimbx=28.649864, Maasaix=37.574437, Maasaiy=-2.222969, Biakax=17.87472, Biakay=3.866779)
 
 aspect_ratio <- 2.5
 height <- 7
-All <- colnames(all)
-ggplot() +
-  geom_polygon(data=afr, aes(x=long, y=lat, group=group), size=10, alpha=0.9, fill="darkgrey")+
-  geom_segment(aes(x = Sanx, y = Sany, xend = 24.5 , yend = -12.5), data = df)+
-geom_segment(aes(x = Namax, y = Namay, xend = 3 , yend = -12), data = df)+
-geom_segment(aes(x = Khomanix, y = Khomaniy, xend = 52 , yend = -44), data = df)+
+
+populations <- ggplot() +
+  geom_polygon(data=afr, aes(x=long, y=lat, group=group), size=5, alpha=0.9, fill="darkgrey")+
+  geom_segment(aes(x = Sanx, y = Sany, xend = 25.5 , yend = -12), data = df)+
+geom_segment(aes(x = Namax, y = Namay, xend = 10 , yend = -20), data = df)+
+geom_segment(aes(x = Khomanix, y = Khomaniy, xend = 47 , yend = -41), data = df)+
 geom_segment(aes(x = Cederbergx, y = Cederbergy, xend = 28 , yend = -42), data = df)+
 geom_segment(aes(x=SACx, y=SACy, xend= 6, yend= -42), data=df)+
-geom_segment(aes(x=Bakax, y=Bakay, xend= -3, yend= 14), data=df)+
-geom_segment(aes(x=Zimbx, y=Zimby, xend= 47, yend= -20), data=df)+
-geom_segment(aes(x=Maasaix, y=Maasaiy, xend= 40, yend= 2), data=df)+
-geom_segment(aes(x=Biakax, y=Biakay, xend= 20 , yend= 15 ), data=df)+
-geom_segment(aes(x=NCTBx, y=NCTBy, xend=-11, yend=-27), data=df)+
-geom_scatterpie(data=piechart_counts, aes(x=lon, y=lat, r = 7.6), cols=colnames(all), pie_scale = 1, legend_name = "Population") + coord_sf(xlim = c(-22, 63), ylim = c(-60, 26), expand = FALSE)+
-  theme(legend.position = "bottom")+  scale_fill_manual(labels = colnames(all), values = c('Khoe-San' = 'red3', 'East Africa' = 'saddlebrown', 'Bantu'='darkgreen', 'Asian'='purple', 'European'='blue', 'Other'='black' )) + theme(legend.position = "bottom")+
-  geom_text(aes(x=lon, y=lat-9.6, label=id), data=piechart_counts, fontface="bold")+
-  geom_text(aes(x=lon, y=lat-13.2, label=n), data=piechart_counts, size=3)
+geom_segment(aes(x=Bakax, y=Bakay, xend= 1, yend= -3), data=df)+
+  geom_segment(aes(x=Zimbx, y=Zimby, xend= 44, yend= -20), data=df)+
+  geom_segment(aes(x=Maasaix, y=Maasaiy, xend= 38, yend= 2), data=df)+
+  geom_segment(aes(x=Biakax, y=Biakay, xend= 17.8 , yend= 8 ), data=df)+
+  geom_scatterpie(data=piechart_counts, aes(x=lon, y=lat, r = 7.8), cols= colnames(all), pie_scale = 1, legend_name = "Population") + coord_sf(xlim = c(-9, 56), ylim = c(-56, 18), expand = FALSE)+
+  scale_fill_manual(labels = colnames(all), values = c('Khoe-San' = 'red3', 'East Africa' = 'saddlebrown', 'Bantu'='darkgreen', 'Asian'='purple', 'European'='blue', 'Other'='black' )) + theme(legend.position = "bottom")+
+  geom_text(aes(x=lon, y=lat-9, label=id), data=piechart_counts, fontface="bold")+
+  geom_text(aes(x=lon, y=lat-11.1, label=n), data=piechart_counts, size=3)
 
-ggsave("populations.png", plot=last_plot(), height = 7 , width = 7 * aspect_ratio)
 
 ```
 
